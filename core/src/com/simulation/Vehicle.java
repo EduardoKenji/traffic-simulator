@@ -8,17 +8,16 @@ public class Vehicle {
 	private Path currentPath;
 	private float x, y;
 	private float width, height;
-	private float speed;
+	private float speed = 1;
 	private float cameraX, cameraY, cameraWidth, cameraHeight;
 	private int vehicleId;
 	
 	public Vehicle(float x, float y, float width, float height, int vehicleId) {
-		super();
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		speed = 1;
+		//speed = 1;
 		this.vehicleId = vehicleId;
 	}
 	
@@ -67,18 +66,21 @@ public class Vehicle {
 			cameraWidth = 40;
 			cameraHeight = height;
 		}
-		if(x > this.x && x > currentPath.getTarget().getX()) {
-			this.x = currentPath.getTarget().getX();
-			if(currentPath.getTarget().getStartingPathList().size() > 0) {
-				currentPath = currentPath.getTarget().getStartingPathList().get(0);
-				// Reset speed during curve to give more realism
-				speed = 0;
+		if(currentPath!= null) {
+			if(x > this.x && x > currentPath.getTarget().getX()) {
+				this.x = currentPath.getTarget().getX();
+				if(currentPath.getTarget().getStartingPathList().size() > 0) {
+					currentPath = currentPath.getTarget().getStartingPathList().get(0);
+					// Reset speed during curve to give more realism
+					speed = 0;
+				} else {
+					currentPath = null;
+				}
 			} else {
-				currentPath = null;
+				this.x = x;
 			}
-		} else {
-			this.x = x;
 		}
+		
 	}
 	
 	public void setY(float y) {

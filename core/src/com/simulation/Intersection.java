@@ -6,11 +6,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-public class Intersection {
-	private int i;
-	private float x, y, width = 60, height = 60;
+public class Intersection extends Entity implements Cloneable {
+	private int i, j;
+	private float x, y, width, height;
 	private int trafficLights[];
 	private float hitboxX, hitboxY, hitboxWidth, hitboxHeight;
+	ArrayList<PathPoint> pathPointList;
 	
 	private float trafficLightsConfig[];
 	private int mode;
@@ -21,23 +22,32 @@ public class Intersection {
 	//0 = red, 1 = yellow, 2 = green, -1 = no semaphore
 	
 	public Intersection(float x, float y, int trafficLights[], int mode, float trafficLightsConfig[], int lines, int columns) {
-		super();
+		super(x+20, y, 30*columns, 30*lines);
+		width = (30*columns);
+		height = (30*lines);
 		this.x = x;
 		hitboxX = x+10;
 		this.y = y;
 		hitboxY = y+10;
-		hitboxWidth = 40;
-		hitboxHeight = 40;
+		hitboxWidth = width-20;
+		hitboxHeight = height-20;
 		this.trafficLights = trafficLights;
 		this.mode = mode;
 		this.trafficLightsConfig = trafficLightsConfig;
 		timer = 0f;
 		sockets = new TrafficLane[lines * columns * 2];
+		pathPointList = new ArrayList<PathPoint>();
+		for(i = 0; i < lines; i++) {
+			for(j = 0; j < columns; j++) {
+				pathPointList.add(new PathPoint(x+(j*30), y+(i*30)));
+			}
+		}
 	}
 	
 	public void draw(ShapeRenderer shapeRenderer) {
 		shapeRenderer.setColor(0, 0, 0, 1);
 		shapeRenderer.rect(x, y, width, height);
+		shapeRenderer.rect(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
 	}
 	
 	public void drawTrafficLightsTimer(SpriteBatch spriteBatch, BitmapFont font) {
@@ -100,6 +110,24 @@ public class Intersection {
 				shapeRenderer.line(x, y+59, x+60, y+59);
 			}
 		}
+	}
+	
+	public void drawPathPoints(ShapeRenderer shapeRenderer) {
+		for(i=0; i<pathPointList.size(); i++) {
+			pathPointList.get(i).draw(shapeRenderer);
+		}
+	}
+	
+	public Intersection clone() throws CloneNotSupportedException {
+        return (Intersection) super.clone();
+	}
+	
+	public ArrayList<PathPoint> getPathPointList() {
+		return pathPointList;
+	}
+
+	public void setPathPointList(ArrayList<PathPoint> pathPointList) {
+		this.pathPointList = pathPointList;
 	}
 
 	public TrafficLane[] getSockets() {
