@@ -5,12 +5,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-public class Button {
+public class Button extends Entity {
 	private float x, y, width, height;
 	private String text;
 	
 	public Button(float x, float y, float width, float height, String text) {
-		super();
+		super(x, y, width, height);
 		this.x = x;
 		this.y = y;
 		this.width = width;

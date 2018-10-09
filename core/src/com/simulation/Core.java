@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 
 public class Core extends ApplicationAdapter implements InputProcessor {
 	
@@ -51,6 +52,9 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	//Texture img;
 	
 	OrthographicCamera camera;
+	float difX, difY;
+	Matrix4 currentProjectionMatrix;
+	float currentZoom;
 	
 	public Core() {
 		
@@ -95,7 +99,7 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		//public Intersection(float x, float y, int trafficLights[], int mode, float trafficLightsConfig[])
 		//mode = 0: Simple round-robin for 2 semaphores; config[0] is the amount of the time the semaphore is green.
 		float trafficLightsConfig[] = {5f};
-		intersectionList.add(new Intersection(500, 100, trafficLightsState, 0, trafficLightsConfig, 2, 2));
+		intersectionList.add(new Intersection(500, 100, 2, 2));
 				
 		
 		TrafficLane trafficLaneList1 = new TrafficLane(200, 100, 300, 30);
@@ -153,12 +157,16 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		editModeCreateVerticalTrafficLane = new TrafficLane(650, 550, 30, 140);
 		//int editModetrafficLightsState[] = {0, -1, -1, 2};
 		//float editModeTrafficLightsConfig[] = {5f};
-		editModeCreateIntersection = new Intersection(500, 510, trafficLightsState, 0, trafficLightsConfig, 2, 2);
+		editModeCreateIntersection = new Intersection(500, 510, 2, 2);
 		buttonList.add(editButton);
 		
 		camera = new OrthographicCamera(960, 720);
 		camera.position.x = 480;
 		camera.position.y = 360;
+		difX = 0;
+		difY = 0;
+		currentZoom = 1;
+		currentProjectionMatrix = spriteBatch.getProjectionMatrix();
 		
 		Gdx.input.setInputProcessor(this);
 	}
@@ -200,47 +208,54 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		shapeRenderer.end();
 		
 		shapeRenderer.begin(ShapeType.Line);
+		/*
 		for(i = 0; i < intersectionList.size(); i++) {
 			intersectionList.get(i).drawTrafficLights(shapeRenderer);
 		}
+		*/
 		for(i = 0; i < buttonList.size(); i++) {
 			buttonList.get(i).drawOutline(shapeRenderer);
 		}
 		shapeRenderer.end();
 		
 		spriteBatch.begin();
+		/*
 		for(i = 0; i < intersectionList.size(); i++) {
 			intersectionList.get(i).drawTrafficLightsTimer(spriteBatch, blackFont);
 		}
+		*/
 		for(i = 0; i < vehicleList.size(); i++) {
 			vehicleList.get(i).drawInfo(spriteBatch, whiteFont);
 		}
 		for(i = 0; i < buttonList.size(); i++) {
 			buttonList.get(i).drawText(spriteBatch, whiteFont);
 		}
-		whiteFont.draw(spriteBatch, "Scrolled: "+scrolled, 100, 620);
+		whiteFont.draw(spriteBatch, "Zoom: "+currentZoom, 100, 700);
+		whiteFont.draw(spriteBatch, mouseCurrentX+", "+mouseCurrentY, 100, 660);
+		whiteFont.draw(spriteBatch, difX+", "+difY, 100, 620);
 		//whiteFont.draw(spriteBatch, "Streets/Roads", 200, 620);
 		spriteBatch.end();
+		//spriteBatch.setProjectionMatrix(currentProjectionMatrix);
 		
 		// Edit Mode
 		if(editMode != 1) { // Out of edit mode
 			update();
 		} else { // With edit mode
-			drawEditMode();
-			
 			try {
 				updateEditMode();
 			} catch (CloneNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+			drawEditMode();	
 		}
 		
-		if(isMouseInsideButton(mouseClickX, mouseClickY, editButton)) {
+		if(isPointInsideEntity(mouseClickX, mouseClickY, editButton)) {
 			if(editMode == 0) {
 				editMode = 1;
 			} else {
+				newIntersection = null;
+				newTrafficLane = null;
 				editMode = 0;
 			}
 		}
@@ -254,56 +269,72 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	}
 	
 	public void handleInput() {
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
 			camera.translate(-3, 0, 0);
+			difX -= 3;
 		}
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 			camera.translate(3, 0, 0);
+			difX += 3;
 		}
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
 			camera.translate(0, -3, 0);
+			difY -= 3;
 		}
-		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
 			camera.translate(0, 3, 0);
+			difY += 3;
 		}
+		/*
 		if(scrolled == 1) {
 			camera.zoom += 0.02;
+			currentZoom += 0.02;
 		} 
 		if(scrolled == -1) {
 			camera.zoom -= 0.02;
+			currentZoom -= 0.02;
 		}
+		*/
 	}
 	
 	public void updateEditMode() throws CloneNotSupportedException {
-		if(isMouseClickInsideEntity(mouseClickX, mouseClickY, editModeCreateHorizontalTrafficLane)) {
-			newIntersection = null;
-			newTrafficLane = editModeCreateHorizontalTrafficLane.clone();
-		}
-		if(isMouseClickInsideEntity(mouseClickX, mouseClickY, editModeCreateVerticalTrafficLane)) {
-			newIntersection = null;
-			newTrafficLane = editModeCreateVerticalTrafficLane.clone();
-		}
-		if(isMouseClickInsideEntity(mouseClickX, mouseClickY, editModeCreateIntersection)) {
-			newTrafficLane = null;
-			newIntersection = editModeCreateIntersection.clone();
-		}
 		if(newTrafficLane != null) {
-			newTrafficLane.setX(mouseCurrentX - (newTrafficLane.getWidth()/2));
-			newTrafficLane.setY(mouseCurrentY - (newTrafficLane.getHeight()/2));
+			newTrafficLane.setX(mouseCurrentX - (newTrafficLane.getWidth()/2) + difX);
+			newTrafficLane.setY(mouseCurrentY - (newTrafficLane.getHeight()/2) + difY);
 		}
 		if(newIntersection != null) {
-			newIntersection.setX(mouseCurrentX - (newIntersection.getWidth()/2));
-			newIntersection.setY(mouseCurrentY - (newIntersection.getHeight()/2));
+			newIntersection.setX(mouseCurrentX - (newIntersection.getWidth()/2) + difX);
+			newIntersection.setY(mouseCurrentY - (newIntersection.getHeight()/2) + difY);
+		}
+		if(isPointInsideEntity(mouseClickX, mouseClickY, editModeCreateHorizontalTrafficLane)) {
+			newIntersection = null;
+			newTrafficLane = editModeCreateHorizontalTrafficLane.clone();
+		} else if(isPointInsideEntity(mouseClickX, mouseClickY, editModeCreateVerticalTrafficLane)) {
+			newIntersection = null;
+			newTrafficLane = editModeCreateVerticalTrafficLane.clone();
+		} else if(isPointInsideEntity(mouseClickX, mouseClickY, editModeCreateIntersection)) {
+			newTrafficLane = null;
+			newIntersection = editModeCreateIntersection.clone();
+		} else if(mouseButton == 0) {
+			if(newIntersection != null) {
+				intersectionList.add(newIntersection);
+				newIntersection = null;
+			}
+			if(newTrafficLane != null) {
+				trafficLaneList.add(newTrafficLane);
+				newTrafficLane = null;
+			}
 		}
 		if(mouseButton == 1 && (newIntersection != null || newTrafficLane != null)) {
 			newIntersection = null;
 			newTrafficLane = null;
 		}
+		
 	}
 	
 	public void drawEditMode() {
 		spriteBatch.begin();
-			whiteFont.draw(spriteBatch, "Streets/Roads: "+car.getX(), 200, 620);
+			//whiteFont.draw(spriteBatch, "Streets/Roads: "+car.getX(), 200, 620);
 		spriteBatch.end();
 		
 		shapeRenderer.begin(ShapeType.Line);
@@ -321,9 +352,11 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	
 	public void update() {
 		// Update
+		/*
 		for(i = 0; i < intersectionList.size(); i++) {
 			intersectionList.get(i).updateTrafficLights(shapeRenderer, Gdx.graphics.getDeltaTime());
 		}
+		*/
 		
 		for(i = 0; i < vehicleList.size(); i++) {	
 			vehicleHaveToBrake = false;
@@ -338,12 +371,14 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 			// If the traffic light is red, the car should brake before it, so we need to check
 			if(vehicleList.get(i).getCurrentPath() != null && vehicleList.get(i).getCurrentPath().getIntersection() != null) {
 				// Check if traffic light in the path is red
+				/*
 				if(vehicleList.get(i).getCurrentPath().getIntersection().getTrafficLights()[(vehicleList.get(i).getCurrentPath().getDirection()+2)%4] == 0) {
 					// Check for collision to brake the car before the red traffic light
 					if(isCollidingWithIntersection(vehicleList.get(i), vehicleList.get(i).getCurrentPath().getIntersection())) {
 						vehicleHaveToBrake = true;
 					}
 				}
+				*/
 			} 
 			
 			if(vehicleHaveToBrake) {
@@ -363,12 +398,9 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		} // for end
 	}
 	
-	public boolean isMouseInsideButton(float x, float y, Button b) {
-		return (x >= b.getX() && x <= b.getX() + b.getWidth() && y >= b.getY() && y <= b.getY() + b.getHeight());
-	}
-	
-	public boolean isMouseClickInsideEntity(float x, float y, Entity b) {
-		return (x >= b.getX() && x <= b.getX() + b.getWidth() && y >= b.getY() && y <= b.getY() + b.getHeight());
+	public boolean isPointInsideEntity(float x, float y, Entity b) {
+		return (x + difX >= b.getX()  && x + difX <= b.getX() + b.getWidth() &&
+				y + difY >= b.getY() && y + difY  <= b.getY() + b.getHeight());
 	}
 	
 	public boolean isCollidingWithIntersection(Vehicle a, Intersection b) {

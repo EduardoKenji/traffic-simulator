@@ -18,11 +18,17 @@ public class Intersection extends Entity implements Cloneable {
 	private float timer;
 	private float yellowLightStartTime = 3.5f;
 	
-	private TrafficLane[] sockets;
+	private int lines, columns;
+	
+	private RoadIntersectionSocket[] westSockets, eastSockets, southSockets, northSockets;
+	
 	//0 = red, 1 = yellow, 2 = green, -1 = no semaphore
 	
-	public Intersection(float x, float y, int trafficLights[], int mode, float trafficLightsConfig[], int lines, int columns) {
-		super(x+20, y, 30*columns, 30*lines);
+	//public Intersection(float x, float y, int trafficLights[], int mode, float trafficLightsConfig[], int lines, int columns) {
+	public Intersection(float x, float y, int lines, int columns) {
+		super(x, y, 30*columns, 30*lines);
+		this.lines = lines;
+		this.columns = columns;
 		width = (30*columns);
 		height = (30*lines);
 		this.x = x;
@@ -31,11 +37,22 @@ public class Intersection extends Entity implements Cloneable {
 		hitboxY = y+10;
 		hitboxWidth = width-20;
 		hitboxHeight = height-20;
-		this.trafficLights = trafficLights;
-		this.mode = mode;
-		this.trafficLightsConfig = trafficLightsConfig;
+		//this.trafficLights = trafficLights;
+		//this.mode = mode;
+		//this.trafficLightsConfig = trafficLightsConfig;
 		timer = 0f;
-		sockets = new TrafficLane[lines * columns * 2];
+		westSockets = new RoadIntersectionSocket[lines];
+		eastSockets = new RoadIntersectionSocket[lines];
+		southSockets = new RoadIntersectionSocket[columns];
+		northSockets = new RoadIntersectionSocket[columns];
+		for(i = 0; i < lines; i++) {
+			westSockets[i] = new RoadIntersectionSocket(x-1, y+(30*i), 2, 30);
+			eastSockets[i] = new RoadIntersectionSocket(x+width-1, y+(30*i), 2, 30);
+		}
+		for(i = 0; i < columns; i++) {
+			southSockets[i] = new RoadIntersectionSocket(x+(30*i), y-1, 30, 2);
+			northSockets[i] = new RoadIntersectionSocket(x+(30*i), y+height-1, 30, 2);
+		}
 		pathPointList = new ArrayList<PathPoint>();
 		for(i = 0; i < lines; i++) {
 			for(j = 0; j < columns; j++) {
@@ -48,8 +65,16 @@ public class Intersection extends Entity implements Cloneable {
 		shapeRenderer.setColor(0, 0, 0, 1);
 		shapeRenderer.rect(x, y, width, height);
 		shapeRenderer.rect(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
+		for(i = 0; i < lines; i++) {
+			westSockets[i].draw(shapeRenderer);
+			eastSockets[i].draw(shapeRenderer);
+		}
+		for(i = 0; i < columns; i++) {
+			southSockets[i].draw(shapeRenderer);
+			northSockets[i].draw(shapeRenderer);
+		}
 	}
-	
+	/*
 	public void drawTrafficLightsTimer(SpriteBatch spriteBatch, BitmapFont font) {
 		Core.glyphLayout.setText(font, String.format("%.1f", trafficLightsConfig[0]-timer));
 		font.draw(spriteBatch, String.format("%.1f", trafficLightsConfig[0]-timer), x-(Core.glyphLayout.width+5), y-Core.glyphLayout.height);
@@ -111,6 +136,7 @@ public class Intersection extends Entity implements Cloneable {
 			}
 		}
 	}
+	*/
 	
 	public void drawPathPoints(ShapeRenderer shapeRenderer) {
 		for(i=0; i<pathPointList.size(); i++) {
@@ -128,14 +154,6 @@ public class Intersection extends Entity implements Cloneable {
 
 	public void setPathPointList(ArrayList<PathPoint> pathPointList) {
 		this.pathPointList = pathPointList;
-	}
-
-	public TrafficLane[] getSockets() {
-		return sockets;
-	}
-
-	public void setSockets(TrafficLane[] sockets) {
-		this.sockets = sockets;
 	}
 
 	public float getTimer() {
