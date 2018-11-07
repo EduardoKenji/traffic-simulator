@@ -8,6 +8,13 @@ public class PathPoint extends Entity {
 	private float x, y, width, height;
 	private ArrayList<Path> startingPathList; //this is the path list in which this point belongs to and it's the start point
 	private ArrayList<Path> endingPathList; //this is the path list in which this point belongs to and it's the end point
+	int mode = 0;
+	float spawnTimer;
+	float currentTimer = 0f;
+	
+	//mode = 1: curve
+	//mode = 2: spawner
+	//mode = 3: despawner 
 	
 	public PathPoint(float x, float y) {
 		super(x, y, 30, 30);
@@ -19,9 +26,34 @@ public class PathPoint extends Entity {
 		endingPathList = new ArrayList<Path>();
 	}
 	
+	
 	public void draw(ShapeRenderer shapeRenderer) {
 		shapeRenderer.setColor(0.1f, 0.6f, 0.9f, 1);
 		shapeRenderer.rect(x, y, width, height);
+	}
+	
+	public float getCurrentTimer() {
+		return currentTimer;
+	}
+
+	public void setCurrentTimer(float currentTimer) {
+		this.currentTimer = currentTimer;
+	}
+
+	public float getSpawnTimer() {
+		return spawnTimer;
+	}
+
+	public void setSpawnTimer(float spawnTimer) {
+		this.spawnTimer = spawnTimer;
+	}
+
+	public int getMode() {
+		return mode;
+	}
+
+	public void setMode(int mode) {
+		this.mode = mode;
 	}
 	
 	public ArrayList<Path> getStartingPathList() {
@@ -55,4 +87,6 @@ public class PathPoint extends Entity {
 	public void setY(float y) {
 		this.y = y;
 	}
+
+
 }

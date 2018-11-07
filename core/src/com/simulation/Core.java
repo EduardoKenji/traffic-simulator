@@ -24,7 +24,6 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	public static GlyphLayout glyphLayout;
 	SpriteBatch spriteBatch;
 	ShapeRenderer shapeRenderer;
-	Vehicle car, car2;
 	ArrayList<Vehicle> vehicleList;
 	ArrayList<TrafficLane> trafficLaneList;
 	ArrayList<PathPoint> pathPointList;
@@ -49,7 +48,6 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	float mouseCurrentX, mouseCurrentY;
 	int mouseButton;
 	int scrolled;
-	//Texture img;
 	
 	OrthographicCamera camera;
 	float difX, difY;
@@ -57,7 +55,6 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 	float currentZoom;
 	
 	public Core() {
-		
 	}
 	
 	@Override
@@ -84,79 +81,95 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		intersectionList = new ArrayList<Intersection>();
 		pathList = new ArrayList<Path>();
 		buttonList = new ArrayList<Button>();
-		
-		car = new Vehicle(200, 100, 30, 30, vehicleId);
-		vehicleId++;
-		car2 = new Vehicle(300, 100, 30, 30, vehicleId);
-		vehicleId++;
-		vehicleList.add(car);
-		vehicleList.add(car2);
-		
-		//left, down, right, up
-		//0 = red, 1 = yellow, 2 = green, -1 = no semaphore
-		int trafficLightsState[] = {0, -1, -1, 2};
-		
-		//public Intersection(float x, float y, int trafficLights[], int mode, float trafficLightsConfig[])
-		//mode = 0: Simple round-robin for 2 semaphores; config[0] is the amount of the time the semaphore is green.
-		float trafficLightsConfig[] = {5f};
-		intersectionList.add(new Intersection(500, 100, 2, 2));
+
+		intersectionList.add(new Intersection(440, 100, 2, 2));
 				
+		TrafficLane leftLane1 = new TrafficLane(200, 100, 240, 30);
+		TrafficLane leftLane2 = new TrafficLane(200, 130, 240, 30);	
+		// 0 and 1
+		trafficLaneList.add(leftLane1);
+		trafficLaneList.add(leftLane2);
+		// 2 and 3
+		trafficLaneList.add(new TrafficLane(440, -80, 30, 180));
+		trafficLaneList.add(new TrafficLane(470, -80, 30, 180));
+		// 4 and 5
+		trafficLaneList.add(new TrafficLane(500, 100, 240, 30));
+		trafficLaneList.add(new TrafficLane(500, 130, 240, 30));
+		// 6 and 7
+		trafficLaneList.add(new TrafficLane(440, 160, 30, 200));
+		trafficLaneList.add(new TrafficLane(470, 160, 30, 200));
+		intersectionList.add(new Intersection(740, 100, 2, 2));
+		// 8 and 9
+		trafficLaneList.add(new TrafficLane(800, 100, 240, 30));
+		trafficLaneList.add(new TrafficLane(800, 130, 240, 30));
+		// 10 and 11
+		trafficLaneList.add(new TrafficLane(740, 160, 30, 200));
+		trafficLaneList.add(new TrafficLane(770, 160, 30, 200));	
+		// 12 and 13
+		trafficLaneList.add(new TrafficLane(740, -80, 30, 180));
+		trafficLaneList.add(new TrafficLane(770, -80, 30, 180));
+		intersectionList.add(new Intersection(440, -140, 2, 2));
+		// 14 and 15
+		trafficLaneList.add(new TrafficLane(200, -140, 240, 30));
+		trafficLaneList.add(new TrafficLane(200, -110, 240, 30));
+		// 16 and 17
+		trafficLaneList.add(new TrafficLane(440, -320, 30, 180));
+		trafficLaneList.add(new TrafficLane(470, -320, 30, 180));
+		// 18 and 19
+		trafficLaneList.add(new TrafficLane(500, -110, 240, 30));
+		trafficLaneList.add(new TrafficLane(500, -140, 240, 30));
+		intersectionList.add(new Intersection(740, -140, 2, 2));
+		// 20 and 21
+		trafficLaneList.add(new TrafficLane(800, -110, 240, 30));
+		trafficLaneList.add(new TrafficLane(800, -140, 240, 30));
+		// 22 and 23
+		trafficLaneList.add(new TrafficLane(740, -320, 30, 180));
+		trafficLaneList.add(new TrafficLane(770, -320, 30, 180));
 		
-		TrafficLane trafficLaneList1 = new TrafficLane(200, 100, 300, 30);
-		TrafficLane trafficLaneList2 = new TrafficLane(200, 130, 300, 30);
-		trafficLaneList.add(trafficLaneList1);
-		trafficLaneList.add(trafficLaneList2);
-		trafficLaneList.add(new TrafficLane(500, 0, 30, 100));
-		trafficLaneList.add(new TrafficLane(530, 0, 30, 100));
-		trafficLaneList.add(new TrafficLane(560, 100, 200, 30));
-		trafficLaneList.add(new TrafficLane(560, 130, 200, 30));
-		trafficLaneList.add(new TrafficLane(500, 160, 30, 200));
-		trafficLaneList.add(new TrafficLane(530, 160, 30, 200));
+		leftLane1.getPathPointList().get(0).setMode(2);
+		leftLane2.getPathPointList().get(0).setMode(2);
 		
-		PathPoint westPathPoint1 = new PathPoint(200, 100);
-		PathPoint westPathPoint2 = new PathPoint(200, 130);
-		PathPoint northPathPoint1 = new PathPoint(500, 330);
-		PathPoint northPathPoint2 = new PathPoint(530, 330);
-		PathPoint southPathPoint1 = new PathPoint(500, 0);
-		PathPoint southPathPoint2 = new PathPoint(530, 0);
-		PathPoint eastPathPoint1 = new PathPoint(730, 100);
-		PathPoint eastPathPoint2 = new PathPoint(730, 130);
-		PathPoint intersectionPathPoint1 = new PathPoint(500, 100);
-		PathPoint intersectionPathPoint2 = new PathPoint(530, 100);
-		PathPoint intersectionPathPoint3 = new PathPoint(500, 130);
-		PathPoint intersectionPathPoint4 = new PathPoint(530, 130);
-		pathPointList.add(westPathPoint1);
-		pathPointList.add(westPathPoint2);
-		pathPointList.add(southPathPoint1);
-		pathPointList.add(southPathPoint2);
-		pathPointList.add(eastPathPoint1);
-		pathPointList.add(eastPathPoint2);
-		pathPointList.add(northPathPoint1);
-		pathPointList.add(northPathPoint2);
-		pathPointList.add(intersectionPathPoint1);
-		pathPointList.add(intersectionPathPoint2);
-		pathPointList.add(intersectionPathPoint3);
-		pathPointList.add(intersectionPathPoint4);
+		leftLane1.getPathPointList().get(0).setSpawnTimer(1.5f);
+		leftLane2.getPathPointList().get(0).setSpawnTimer(1.5f);
 		
-		pathList.add(new Path(westPathPoint1, eastPathPoint1, 2, intersectionList.get(0)));
-		pathList.add(new Path(westPathPoint1, intersectionPathPoint3, 2, intersectionList.get(0)));
-		pathList.add(new Path(westPathPoint1, intersectionPathPoint4, 2, intersectionList.get(0)));
-		pathList.add(new Path(westPathPoint2, eastPathPoint2, 2, intersectionList.get(0)));
-		pathList.add(new Path(westPathPoint2, intersectionPathPoint1, 2, intersectionList.get(0)));
-		pathList.add(new Path(westPathPoint2, intersectionPathPoint2, 2, intersectionList.get(0)));
-		pathList.add(new Path(intersectionPathPoint3, northPathPoint1, 3, intersectionList.get(0)));
-		pathList.add(new Path(intersectionPathPoint4, southPathPoint2, 3, intersectionList.get(0)));
+		pathList.add(new Path(leftLane1.getPathPointList().get(0), trafficLaneList.get(8).getPathPointList().get(1), 2, intersectionList.get(0).getWestSockets()[0]));
+		//pathList.add(new Path(leftLane2.getPathPointList().get(0), trafficLaneList.get(9).getPathPointList().get(1), 2));
+		pathList.add(new Path(leftLane2.getPathPointList().get(0), intersectionList.get(0).getPathPointList().get(2), 2, intersectionList.get(0).getWestSockets()[1]));
 		
-		car2.setCurrentPath(pathList.get(1));
-		car.setCurrentPath(pathList.get(0));
+		pathList.add(new Path(intersectionList.get(0).getPathPointList().get(2), trafficLaneList.get(6).getPathPointList().get(1), 3, null));
+		pathList.add(new Path(intersectionList.get(0).getPathPointList().get(2), intersectionList.get(1).getPathPointList().get(2), 2, null));
 		
-		//img = new Texture("badlogic.jpg");
+		trafficLaneList.get(20).getPathPointList().get(1).setMode(2);
+		trafficLaneList.get(21).getPathPointList().get(1).setMode(2);
+		
+		trafficLaneList.get(20).getPathPointList().get(1).setSpawnTimer(1.5f);
+		trafficLaneList.get(21).getPathPointList().get(1).setSpawnTimer(1.5f);
+		
+		pathList.add(new Path(trafficLaneList.get(20).getPathPointList().get(1), trafficLaneList.get(14).getPathPointList().get(0), 0, null));
+		pathList.add(new Path(trafficLaneList.get(21).getPathPointList().get(1), trafficLaneList.get(15).getPathPointList().get(0), 0, null));
+		
+		for(i = 0; i < trafficLaneList.size(); i++) {
+			pathPointList.add(trafficLaneList.get(i).getPathPointList().get(0));
+			pathPointList.add(trafficLaneList.get(i).getPathPointList().get(1));
+		}
+		
+		for(i = 0; i < intersectionList.size(); i++) {
+			for(j = 0; j < intersectionList.get(i).getPathPointList().size(); j++) {
+				pathPointList.add(intersectionList.get(i).getPathPointList().get(j));
+			}
+		}
+
+		float config[] = {5, 1, 3};
+		
+		intersectionList.get(0).getWestSockets()[0].setCurrentColor(0);
+		intersectionList.get(0).getWestSockets()[0].setConfig(config);
+		intersectionList.get(0).getWestSockets()[1].setCurrentColor(0);
+		intersectionList.get(0).getWestSockets()[1].setConfig(config);
+		
 		editMode = 0;
 		editButton = new Button(100, 520, 100, 50, "Edit");
 		editModeCreateHorizontalTrafficLane = new TrafficLane(450, 620, 140, 30);
 		editModeCreateVerticalTrafficLane = new TrafficLane(650, 550, 30, 140);
-		//int editModetrafficLightsState[] = {0, -1, -1, 2};
-		//float editModeTrafficLightsConfig[] = {5f};
 		editModeCreateIntersection = new Intersection(500, 510, 2, 2);
 		buttonList.add(editButton);
 		
@@ -200,30 +213,15 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 			intersectionList.get(i).draw(shapeRenderer);
 			intersectionList.get(i).drawPathPoints(shapeRenderer);
 		}
-		/*
-		for(i = 0; i < pathPointList.size(); i++) {
-			pathPointList.get(i).draw(shapeRenderer);
-		}
-		*/
 		shapeRenderer.end();
 		
 		shapeRenderer.begin(ShapeType.Line);
-		/*
-		for(i = 0; i < intersectionList.size(); i++) {
-			intersectionList.get(i).drawTrafficLights(shapeRenderer);
-		}
-		*/
 		for(i = 0; i < buttonList.size(); i++) {
 			buttonList.get(i).drawOutline(shapeRenderer);
 		}
 		shapeRenderer.end();
 		
 		spriteBatch.begin();
-		/*
-		for(i = 0; i < intersectionList.size(); i++) {
-			intersectionList.get(i).drawTrafficLightsTimer(spriteBatch, blackFont);
-		}
-		*/
 		for(i = 0; i < vehicleList.size(); i++) {
 			vehicleList.get(i).drawInfo(spriteBatch, whiteFont);
 		}
@@ -233,9 +231,8 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		whiteFont.draw(spriteBatch, "Zoom: "+currentZoom, 100, 700);
 		whiteFont.draw(spriteBatch, mouseCurrentX+", "+mouseCurrentY, 100, 660);
 		whiteFont.draw(spriteBatch, difX+", "+difY, 100, 620);
-		//whiteFont.draw(spriteBatch, "Streets/Roads", 200, 620);
+		whiteFont.draw(spriteBatch, "Test: "+intersectionList.get(0).getPathPointList().get(2).getStartingPathList().size(), 100, 300);
 		spriteBatch.end();
-		//spriteBatch.setProjectionMatrix(currentProjectionMatrix);
 		
 		// Edit Mode
 		if(editMode != 1) { // Out of edit mode
@@ -266,6 +263,98 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 		mouseClickY = -1;
 		mouseButton = -1;
 		scrolled = 0;
+	}
+	
+	int flag;
+	
+	public void update() {
+		// Update
+		
+		for(i = 0; i < pathPointList.size(); i++) {
+			pathPointList.get(i).setCurrentTimer(pathPointList.get(i).getCurrentTimer() + Gdx.graphics.getDeltaTime());
+			if(pathPointList.get(i).getMode() == 2) {
+				
+				flag = 0;
+				for(j = 0; j < vehicleList.size(); j++) {
+					if(vehicleInsideSpawnPoint(vehicleList.get(j), pathPointList.get(i))) { //Se há veículo dentro do spawn point
+						flag = 1;
+					}
+				}
+				
+				if(flag == 0) { // Se não há veículos dentro do spawn point
+					if(pathPointList.get(i).getCurrentTimer() >= pathPointList.get(i).getSpawnTimer()) {
+						pathPointList.get(i).setCurrentTimer(0f);
+						pathPointList.get(i).setSpawnTimer((float)Math.random() + 0.5f);
+						vehicleList.add(new Vehicle(pathPointList.get(i).getX(), pathPointList.get(i).getY(), 30, 30, vehicleId));
+						vehicleList.get(vehicleList.size() - 1).setCurrentPath(pathPointList.get(i).getStartingPathList().get(0));
+						vehicleList.get(vehicleList.size() - 1).setMaxSpeed((float)(0.3 * Math.random()) + 0.7f);
+						vehicleId++;
+					}
+				}
+			}
+		}
+		
+		for(i = 0; i < intersectionList.size(); i++) {
+			intersectionList.get(i).update();
+		}
+		
+		for(i = 0; i < vehicleList.size(); i++) {	
+			if(vehicleList.get(i).isFinished()) {
+				vehicleList.remove(i);
+			}
+		}
+		
+		for(i = 0; i < vehicleList.size(); i++) {	
+			vehicleHaveToBrake = false;
+			// Check if vehicles should brake or accelerate (checking collision)
+			for(j = 0; j < vehicleList.size(); j++) {
+				if(i == j) continue;
+				if(areVehiclesColliding(vehicleList.get(i), vehicleList.get(j))) {
+					vehicleHaveToBrake = true;
+				} 
+			}
+		
+			// If the traffic light is red, the car should brake before it, so we need to check
+			if(vehicleList.get(i).getCurrentPath() != null && vehicleList.get(i).getCurrentPath().getSocket() != null) {
+				
+				// Check if traffic light in the path is red
+				
+				if(vehicleList.get(i).getCurrentPath().getSocket().getCurrentColor() == 2) {
+					// Check for collision to brake the car before the red traffic light
+					if(isCollidingWithIntersection(vehicleList.get(i), vehicleList.get(i).getCurrentPath().getSocket().getIntersection())) {
+						vehicleHaveToBrake = true;
+					}
+				}
+				
+			} 
+			
+			if(vehicleHaveToBrake) {
+				vehicleList.get(i).brake();
+			} else {
+				vehicleList.get(i).accelerate();
+			}
+			
+			// Move vehicles
+			if(vehicleList.get(i).getCurrentPath() != null) {
+				if(vehicleList.get(i).getCurrentPath().getDirection() == 2) {
+					vehicleList.get(i).setX(vehicleList.get(i).getX() + vehicleList.get(i).getSpeed());
+				} else if(vehicleList.get(i).getCurrentPath().getDirection() == 3) {
+					vehicleList.get(i).setY(vehicleList.get(i).getY() + vehicleList.get(i).getSpeed());
+				} else if(vehicleList.get(i).getCurrentPath().getDirection() == 0) {
+					vehicleList.get(i).setX(vehicleList.get(i).getX() - vehicleList.get(i).getSpeed());
+				}
+			}
+		} // for end
+	}
+	
+	public boolean vehicleInsideSpawnPoint(Vehicle a, PathPoint b) {
+		if(a.getX() == b.getX() && (Math.abs(a.getY() - b.getY()) < 45)) {
+			return true;
+		}
+		if(a.getY() == b.getY() && (Math.abs(a.getX() - b.getX()) < 45)) {
+			return true;
+		}
+		return false;
 	}
 	
 	public void handleInput() {
@@ -348,54 +437,6 @@ public class Core extends ApplicationAdapter implements InputProcessor {
 				newIntersection.draw(shapeRenderer);
 			}
 		shapeRenderer.end();
-	}
-	
-	public void update() {
-		// Update
-		/*
-		for(i = 0; i < intersectionList.size(); i++) {
-			intersectionList.get(i).updateTrafficLights(shapeRenderer, Gdx.graphics.getDeltaTime());
-		}
-		*/
-		
-		for(i = 0; i < vehicleList.size(); i++) {	
-			vehicleHaveToBrake = false;
-			// Check if vehicles should brake or accelerate (checking collision)
-			for(j = 0; j < vehicleList.size(); j++) {
-				if(i == j) continue;
-				if(areVehiclesColliding(vehicleList.get(i), vehicleList.get(j))) {
-					vehicleHaveToBrake = true;
-				} 
-			}
-		
-			// If the traffic light is red, the car should brake before it, so we need to check
-			if(vehicleList.get(i).getCurrentPath() != null && vehicleList.get(i).getCurrentPath().getIntersection() != null) {
-				// Check if traffic light in the path is red
-				/*
-				if(vehicleList.get(i).getCurrentPath().getIntersection().getTrafficLights()[(vehicleList.get(i).getCurrentPath().getDirection()+2)%4] == 0) {
-					// Check for collision to brake the car before the red traffic light
-					if(isCollidingWithIntersection(vehicleList.get(i), vehicleList.get(i).getCurrentPath().getIntersection())) {
-						vehicleHaveToBrake = true;
-					}
-				}
-				*/
-			} 
-			
-			if(vehicleHaveToBrake) {
-				vehicleList.get(i).brake();
-			} else {
-				vehicleList.get(i).accelerate();
-			}
-			
-			// Move vehicles
-			if(vehicleList.get(i).getCurrentPath() != null) {
-				if(vehicleList.get(i).getCurrentPath().getDirection() == 2) {
-					vehicleList.get(i).setX(vehicleList.get(i).getX() + vehicleList.get(i).getSpeed());
-				} else if(vehicleList.get(i).getCurrentPath().getDirection() == 3) {
-					vehicleList.get(i).setY(vehicleList.get(i).getY() + vehicleList.get(i).getSpeed());
-				}
-			}
-		} // for end
 	}
 	
 	public boolean isPointInsideEntity(float x, float y, Entity b) {

@@ -8,9 +8,11 @@ public class Vehicle {
 	private Path currentPath;
 	private float x, y;
 	private float width, height;
-	private float speed = 1;
+	private float speed;
 	private float cameraX, cameraY, cameraWidth, cameraHeight;
 	private int vehicleId;
+	private boolean finished;
+	private float maxSpeed;
 	
 	public Vehicle(float x, float y, float width, float height, int vehicleId) {
 		this.x = x;
@@ -28,7 +30,7 @@ public class Vehicle {
 	
 	public void accelerate() {
 		speed += 0.025f;
-		if(speed > 1) speed = 1;
+		if(speed > maxSpeed) speed = maxSpeed;
 	}
 	
 	public float getSpeed() {
@@ -54,6 +56,19 @@ public class Vehicle {
 		shapeRenderer.rect(cameraX, cameraY, cameraWidth, cameraHeight);
 	}
 	
+	
+	
+	public float getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public void setMaxSpeed(float maxSpeed) {
+		this.maxSpeed = maxSpeed;
+		speed = maxSpeed;
+	}
+
+	int previousDirection;
+	
 	public void setX(float x) {
 		if(x > this.x) {
 			cameraX = x+width;
@@ -67,20 +82,33 @@ public class Vehicle {
 			cameraHeight = height;
 		}
 		if(currentPath!= null) {
-			if(x > this.x && x > currentPath.getTarget().getX()) {
+			if(currentPath.getDirection() == 2 && x > this.x && x > currentPath.getTarget().getX()) {
 				this.x = currentPath.getTarget().getX();
 				if(currentPath.getTarget().getStartingPathList().size() > 0) {
-					currentPath = currentPath.getTarget().getStartingPathList().get(0);
+					previousDirection = currentPath.getDirection();
+					currentPath = currentPath.getTarget().getStartingPathList().get((int)(Math.random() * currentPath.getTarget().getStartingPathList().size()));
+					// Reset speed during curve to give more realism
+					if(currentPath.getDirection() != previousDirection) {
+						speed = 0.2f + (float)(Math.random() * 0.3f);
+					}
+				} else {
+					finished = true;
+					currentPath = null;
+				}
+			} else if(currentPath.getDirection() == 0 && x < this.x && x < currentPath.getTarget().getX()) {
+				this.x = currentPath.getTarget().getX();
+				if(currentPath.getTarget().getStartingPathList().size() > 0) {
+					currentPath = currentPath.getTarget().getStartingPathList().get((int)(Math.random() * currentPath.getTarget().getStartingPathList().size()));
 					// Reset speed during curve to give more realism
 					speed = 0;
 				} else {
+					finished = true;
 					currentPath = null;
 				}
 			} else {
 				this.x = x;
 			}
 		}
-		
 	}
 	
 	public void setY(float y) {
@@ -95,20 +123,29 @@ public class Vehicle {
 			cameraWidth = width;
 			cameraHeight = 40;
 		}
-		if(y > this.y && y > currentPath.getTarget().getY()) {
+		if(currentPath.getDirection() == 3 && y > this.y && y > currentPath.getTarget().getY()) {
 			this.y = currentPath.getTarget().getY();
 			if(currentPath.getTarget().getStartingPathList().size() > 0) {
-				currentPath = currentPath.getTarget().getStartingPathList().get(0);
+				currentPath = currentPath.getTarget().getStartingPathList().get((int)(Math.random() * currentPath.getTarget().getStartingPathList().size()));
 				// Reset speed during curve to give more realism
 				speed = 0;
 			} else {
 				currentPath = null;
+				finished = true;
 			}
 		} else {
 			this.y = y;
 		}
 	}
 	
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
+	}
+
 	public Path getCurrentPath() {
 		return currentPath;
 	}
