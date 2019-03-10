@@ -2,6 +2,7 @@ package com.simulation;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class PathPoint extends Entity {
@@ -26,6 +27,10 @@ public class PathPoint extends Entity {
 		endingPathList = new ArrayList<Path>();
 	}
 	
+	
+	public void update() {
+		currentTimer += Gdx.graphics.getDeltaTime();
+	}
 	
 	public void draw(ShapeRenderer shapeRenderer) {
 		shapeRenderer.setColor(0.1f, 0.6f, 0.9f, 1);
